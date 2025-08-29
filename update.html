@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome file</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="update-drupal-10.5---drupal-11.1">Update Drupal 10.5 -&gt; Drupal 11.1</h1>
+<ol>
+<li>
+<p>Spin up local instance in lando with all files (private and public) on a clean branch</p>
+</li>
+<li>
+<p>Add the <code>update.sh</code> script to the project root: <a href="https://github.com/ubc-web-services/d11upgrade">repo here</a></p>
+</li>
+<li>
+<p>Run Update script in root. This will complete the following updates:</p>
+<ul>
+<li>Drush</li>
+<li>Webform (+adds patch)</li>
+<li>File Delete</li>
+<li>Formtips (needs to straddle required versions:  ^1.11||^2.0)</li>
+<li>Image Widget Crop</li>
+<li>Linkit</li>
+<li>Linkit Media Library</li>
+<li>UBC Portfolio modules (does not include CWL or custom modules)</li>
+</ul>
+<p>Additionally, it will:</p>
+<ul>
+<li>Add and install the Upgrade Status module (if needed)</li>
+<li>Update the core version requirement to VPR and Science portfolio child themes</li>
+<li>Prompt you to add the core version requirement if you’re using a custom theme</li>
+</ul>
+<pre><code>sh update.sh
+</code></pre>
+</li>
+<li>
+<p>Review and resolve the issues on the Upgrade Status page</p>
+<ul>
+<li>/admin/reports/upgrade-status</li>
+<li>Note that formtips will show as having an <em>Incompatible</em> local version, but that can be disregarded since we are straddling required versions. The updated version will be pulled in when core is updated.</li>
+</ul>
+</li>
+<li>
+<p>Backup work</p>
+<ul>
+<li>Run database updates to ensure the latest changes are in place.<br>
+<code>lando drush updb</code></li>
+<li>Export database in case you want to roll back.<br>
+<code>lando db-export</code></li>
+</ul>
+</li>
+<li>
+<p>Run Update: also see <a href="https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11">Official Docs</a></p>
+<ul>
+<li>Update permissions.<pre><code>chmod 777 web/sites/default
+chmod 666 web/sites/default/*settings.php
+chmod 666 web/sites/default/*services.yml
+</code></pre>
+</li>
+<li>Change core without updating.<pre><code>composer require 'drupal/core-recommended:^11' \
+                 'drupal/core-composer-scaffold:^11' \
+                 'drupal/core-project-message:^11' --no-update
+</code></pre>
+</li>
+<li>Perform the update dry-run<br>
+<code>composer update --dry-run</code></li>
+<li>If no errors, perform the update<br>
+<code>composer update</code></li>
+<li>Run database updates again.<br>
+<code>lando drush updb</code></li>
+<li>Reinstate permissions (optional on local)<pre><code>chmod 777 web/sites/default
+chmod 666 web/sites/default/*settings.php
+chmod 666 web/sites/default/*services.yml
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>Commit all changes</p>
+</li>
+</ol>
+</div>
+</body>
+
+</html>
