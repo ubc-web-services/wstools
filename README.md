@@ -5,7 +5,7 @@
 3. Run Update script in root. This will complete the following updates:
 
 	- Drush
-	- Webform (+adds patch)
+	- Webform (+adds patch - not needed once https://www.drupal.org/project/webform/issues/3526888 is in a release)
 	- File Delete
 	- Formtips (needs to straddle required versions:  \^1.11||\^2.0)
 	- Image Widget Crop
