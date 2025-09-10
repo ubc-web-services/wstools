@@ -1,4 +1,4 @@
-#  Update Drupal 10.5 -> Drupal 11.1
+#  Update Drupal 10.5 -> Drupal 11.2
 
 1. Spin up local instance in lando with all files (private and public) on a clean branch
 2. Add the `update.sh` script to the project root: [repo here](https://github.com/ubc-web-services/d11upgrade)
@@ -7,7 +7,9 @@
 	- Drush
 	- Webform (+adds patch - not needed once https://www.drupal.org/project/webform/issues/3526888 is in a release)
 	- File Delete
-	- Formtips (needs to straddle required versions:  \^1.11||\^2.0)
+	- Formtips (needs to straddle versions:  \^1.11||\^2.0)
+	- Gin (needs to straddle versions:  \^4.1||\^5.0)
+	- Gin Toolbar (needs to straddle versions:  \^2.1||\^3.0)
 	- Image Widget Crop
 	- Linkit
 	- Linkit Media Library

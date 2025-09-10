@@ -103,7 +103,7 @@ jq --arg key "$PATCH_KEY" \
 echo "✅ Patch for $PATCH_KEY has been added."
 
 # Update / Add dependencies
-composer require drush/drush 'drupal/formtips:^1.11||^2.0' drupal/upgrade_status 'drupal/webform:^6.3@beta' 'drupal/linkit:^7.0' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0'
+composer require drush/drush 'drupal/formtips:^1.11||^2.0' drupal/upgrade_status 'drupal/webform:^6.3@beta' 'drupal/linkit:^7.0' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0'
 lando drush pm:enable upgrade_status
 
 echo "All done"
