@@ -1,0 +1,71 @@
+#!/bin/bash
+
+## Description: create a custom theme and install recipes, settings, export configuration
+## Usage: quickstart
+## Example: ddev quickstart
+
+# setup sitename
+echo -e "Please enter the site name: "
+read sitename
+
+# setup themename
+echo -e "Please enter a machine name for your new theme (lowercase and underscores only): "
+read themename
+
+cd ${DDEV_DOCROOT}
+
+# Create a new theme
+php core/scripts/drupal generate-theme "$themename"  --starterkit kraken --path themes/custom
+
+# Run the main orchestration recipe
+php core/scripts/drupal recipe ../recipes/ws-recipes -v
+
+# Enable devel
+drush pm:enable devel
+
+# Set the site name and email address
+drush config-set system.site name "$sitename" -y
+
+# Set the site name in the kraken theme
+drush config-set kraken.settings clf_unitname "$sitename" -y
+
+# Set media_alias_display settings
+drush config-set media_alias_display.settings media_bundles.audio audio -y
+drush config-set media_alias_display.settings media_bundles.file file -y
+drush config-set media_alias_display.settings media_bundles.image image -y
+drush config-set media_alias_display.settings media_bundles.svg_icon svg_icon -y
+
+# Remove unused role
+drush config:delete "user.role.content_editor"
+drush config:delete "system.action.user_add_role_action.content_editor"
+drush config:delete "system.action.user_remove_role_action.content_editor"
+
+# Delete unused Article, Basic Page and Comment entities
+drush entity:delete node --bundle=article
+drush entity:delete node --bundle=page
+
+# Delete Article, Basic Page and Comment types
+drush eval "\Drupal::entityTypeManager()->getStorage('node_type')->load('page')->delete();"
+drush eval "\Drupal::entityTypeManager()->getStorage('node_type')->load('article')->delete();"
+drush eval "\Drupal::entityTypeManager()->getStorage('comment_type')->load('comment')->delete();"
+
+# Disable comment and announcement modules
+drush pmu comment
+drush pmu announcements_feed
+
+# Rebuild Permissions
+drush php-eval 'node_access_rebuild();'
+
+# Run any updates
+drush updb -y
+
+# Set the custom theme as the default theme
+drush theme:enable "$themename"
+drush config-set system.theme default "$themename" -y
+drush config-set "$themename".settings clf_unitname "$sitename" -y
+# drush theme:uninstall kraken -y
+
+# Export the config
+drush cex -y
+
+echo "All done"

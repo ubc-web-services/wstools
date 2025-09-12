@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# Update based on Project Type selected:
+## Set up the update options
+run_updates() {
+    echo "Choose a project type:"
+    OPTIONS=("Custom" "VPR" "Science" "Exit")
+
+    select OPT in "${OPTIONS[@]}"; do
+        case $REPLY in
+            1)
+                echo "✅ Updating custom modules..."
+                composer require ubc-web-services/kraken ubc-web-services/ubc_add_to_calendar ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
+                return 0
+                ;;
+            2)
+                echo "✅ Updating custom VPR modules..."
+                composer require ubc-web-services/kraken-vpr:dev-master ubc-web-services/ubc_add_to_calendar ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
+                INFO_FILE="web/themes/custom/vpr/vpr.info.yml"
+                return 0
+                ;;
+            3)
+                echo "✅ Updating custom Science modules..."
+                composer require ubc-web-services/kraken-science ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules ubc-web-services/ubc_science_shared_config
+                INFO_FILE="web/themes/custom/science/science.info.yml"
+                return 0
+                ;;
+            4)
+                echo "Exiting..."
+                exit 0
+                ;;
+            *)
+                echo "❌ Invalid option. Please try again."
+                ;;
+        esac
+  done
+}
+
+## Run updates
+run_updates
+
+# Update the core version requirement if we can
+if [[ -f "$INFO_FILE" ]]; then
+    sed -i '' "/^core_version_requirement:/{
+        s/.*/core_version_requirement: '>=10'/
+    }" "$INFO_FILE"
+    echo "✅ Core version requirement updated"
+else
+  echo "❌ Please update the core_version_requirement value in the .info file manually. Correct value: '>=10'."
+fi
+
+# Add webform patch
+COMPOSER_FILE="composer.json"
+PATCH_KEY="drupal/webform"
+PATCH_DESCRIPTION="Patches help key in node.type.webform to use null instead of empty value - required for installing via recipe"
+PATCH_URL="https://raw.githubusercontent.com/ubc-web-services/patches/refs/heads/master/webform_node-help-value.patch"
+
+## Check if jq is installed
+if ! command -v jq &> /dev/null; then
+    echo "❌ jq is not installed."
+    echo "Please install jq and run this again."
+    exit 1
+fi
+
+## Check if the composer file exists
+if [[ ! -f "$COMPOSER_FILE" ]]; then
+    echo "❌ composer.json not found"
+    exit 1
+fi
+
+## Make a single tmp file we’ll reuse
+TMP_FILE=$(mktemp)
+
+## Step 1: Fix web/recipes keys
+jq '
+  if .extra["installer-paths"] != null then
+    .extra["installer-paths"] |= with_entries(
+      if .key | test("^web/recipes/") then
+        .key |= sub("^web/recipes/"; "recipes/")
+      else
+        .
+      end
+    )
+  else
+    .
+  end
+' "$COMPOSER_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$COMPOSER_FILE"
+
+echo "✅ Updated installer-path keys from web/recipes/* → recipes/*."
+
+## Step 2: Add patch if missing
+if jq -e --arg key "$PATCH_KEY" '.extra.patches[$key]' "$COMPOSER_FILE" >/dev/null; then
+    echo "✅ Patch for $PATCH_KEY already exists. No changes made."
+else
+    jq --arg key "$PATCH_KEY" \
+       --arg desc "$PATCH_DESCRIPTION" \
+       --arg url "$PATCH_URL" \
+       'if .extra.patches == {} or (.extra.patches | type == "null")
+        then .extra.patches = { ($key): { ($desc): $url } }
+        else .extra.patches[$key] += { ($desc): $url }
+        end' "$COMPOSER_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$COMPOSER_FILE"
+
+    echo "✅ Patch for $PATCH_KEY has been added."
+fi
+
+# Update / Add dependencies
+composer require drush/drush 'drupal/formtips:^1.11||^2.0' drupal/upgrade_status 'drupal/webform:^6.3@beta' 'drupal/linkit:^7.0' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev'
+lando drush pm:enable upgrade_status
+
+## Update .gitignore if it has /web/recipes/
+if [[ -f ".gitignore" ]]; then
+    if grep -q "^/web/recipes/" .gitignore; then
+        sed -i.bak 's#^/web/recipes/#/recipes/#' .gitignore
+        echo "✅ Updated .gitignore entries from /web/recipes/ → /recipes/"
+    else
+        echo "ℹ️  No /web/recipes/ entries found in .gitignore"
+    fi
+else
+    echo "ℹ️  No .gitignore file found, skipping"
+fi
+
+echo "All done - make sure to delete any recipes detected inside the web directory and check your theme for the core_version_requirement: '>=10' in the .info file"

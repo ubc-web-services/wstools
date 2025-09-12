@@ -1,62 +1,82 @@
 #  Update Drupal 10.5 -> Drupal 11.2
 
-1. Spin up local instance in lando with all files (private and public) on a clean branch
-2. Add the `update.sh` script to the project root: [repo here](https://github.com/ubc-web-services/d11upgrade)
-3. Run Update script in root. This will complete the following updates:
+[repo here](https://github.com/ubc-web-services/d11upgrade)
 
-	- Drush
-	- Webform (+adds patch - not needed once https://www.drupal.org/project/webform/issues/3526888 is in a release)
-	- File Delete
-	- Formtips (needs to straddle versions:  \^1.11||\^2.0)
-	- Gin (needs to straddle versions:  \^4.1||\^5.0)
-	- Gin Toolbar (needs to straddle versions:  \^2.1||\^3.0)
-	- Image Widget Crop
-	- Linkit
-	- Linkit Media Library
-	- UBC Portfolio modules (does not include CWL or custom modules)
+##  Preparation DDEV (Preferred)
+1. Add ddev to the project `ddev config` (defaults are fine)
+2. Run `composer install` to pull in current dependencies
+3. Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
+4. Start the site with `ddev start`
+5. Import the db with `ddev import-db < [databasename]`
+6. Flush caches `ddev drush cr`
+7. Run script with `ddev d11prepare`
 
-	Additionally, it will:
+##  Preparation (Lando)
+1. Run `composer install` to pull in current dependencies
+2. Add the script `d11prepare.sh` to the root project directory
+3. Start site with `lando start`
+4. Import the db with `lando db-import [databasename]`
+5. Flush caches `lando drush cr`
+6. Run script in root `sh d11prepare.sh`
 
-	- Add and install the Upgrade Status module (if needed)
-	- Update the core version requirement to VPR and Science portfolio child themes
-	- Prompt you to add the core version requirement if you're using a custom theme
+##  Script operations
+The script will first ask whether the site is based on a VPR, Science or other boilerplate. It then attempts to make the follwoing updates
 
-	```
-	sh update.sh
-	```
+###  Modules updated
+- Drush
+- Webform (+adds patch - not needed once https://www.drupal.org/project/webform/issues/3526888 is in a release)
+- File Delete
+- Formtips (needs to straddle versions: \^1.11||\^2.0)
+- Gin (needs to straddle versions: \^4.1||\^5.0)
+- Gin Toolbar (needs to straddle versions: \^2.1||\^3.0)
+- Image Widget Crop
+- Linkit
+- Linkit Media Library
+- UBC Portfolio modules (does not include CWL or custom modules)
+- UBC Recipes
 
-4. Review and resolve the issues on the Upgrade Status page
-	- /admin/reports/upgrade-status
-	- Note that formtips will show as having an *Incompatible* local version, but that can be disregarded since we are straddling required versions. The updated version will be pulled in when core is updated.
+###  Additional updates
+- Add and install the Upgrade Status module (if needed)
+- Update the core version requirement to VPR and Science portfolio child themes
+- Prompt you to add the core version requirement if you're using a custom theme
+- alter the recipe location to the root directory
+- alter the .gitignore to remove /web/recipes/ and add /recipes/
 
-5. Backup work
-	- Run database updates to ensure the latest changes are in place.
-	`lando drush updb`
-	- Export database in case you want to roll back.
-	`lando db-export`
-6. Run Update: also see [Official Docs](https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11)
-	- Update permissions.
-		```
-		chmod 777 web/sites/default
-		chmod 666 web/sites/default/*settings.php
-		chmod 666 web/sites/default/*services.yml
-		```
-	- Change core without updating.
-		```
-		composer require 'drupal/core-recommended:^11' \
-		                 'drupal/core-composer-scaffold:^11' \
-		                 'drupal/core-project-message:^11' --no-update
-		```
-	- Perform the update dry-run
-	`composer update --dry-run`
-	- If no errors, perform the update
-	`composer update`
-	- Run database updates again.
-	`lando drush updb`
-	- Reinstate permissions (optional on local)
-		```
-		chmod 777 web/sites/default
-		chmod 666 web/sites/default/*settings.php
-		chmod 666 web/sites/default/*services.yml
-		```
-7. Commit all changes
+###  Cleanup
+You should see a large number of recipes files in /web/recipes/ - these should not be committed and can be safely discarded.
+
+##  Next Steps
+1. Review and resolve the issues on the Upgrade Status page
+- /admin/reports/upgrade-status
+- Note that formtips will show as having an *Incompatible* local version, but that can be disregarded since we are straddling required versions. The updated version will be pulled in when core is updated.
+2. Backup work
+- Run database updates to ensure the latest changes are in place.
+`ddev drush updb` OR `lando drush updb`
+- Export database in case you want to roll back.
+`ddev export-db --file=db.sql.gz` OR `lando db-export`
+3. Run Update: also see [Official Docs](https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11)
+- Update permissions.
+```
+chmod 777 web/sites/default
+chmod 666 web/sites/default/*settings.php
+chmod 666 web/sites/default/*services.yml
+```
+- Change core without updating.
+```
+composer require 'drupal/core-recommended:^11' \
+'drupal/core-composer-scaffold:^11' \
+'drupal/core-project-message:^11' --no-update
+```
+- Perform the update dry-run
+`composer update --dry-run`
+- If no errors, perform the update
+`composer update`
+- Run database updates again.
+`lando drush updb`
+- Reinstate permissions (optional on local)
+```
+chmod 777 web/sites/default
+chmod 666 web/sites/default/*settings.php
+chmod 666 web/sites/default/*services.yml
+```
+4. Commit all changes
