@@ -1,8 +1,18 @@
 #  Update Drupal 10.5 -> Drupal 11.2
 
-[repo here](https://github.com/ubc-web-services/d11upgrade)
+## Audit
+1. Add audit.sh to your repo root
+2. Run `sh audit.sh` to exectute the script
+3. The script will output a list of:
+    - services from the .platform/services.yaml file
+    - a list of custom modules contained in web/modules/custom
+    - composer dependencies not included in the boilerplate
+    - patches in the composer file
+4. The results will also be written to a project_summary.md file in the project root.
 
-##  Preparation DDEV (Preferred)
+## Update
+
+###  Preparation DDEV (Preferred)
 1. Add ddev to the project `ddev config` (defaults are fine)
 2. Run `composer install` to pull in current dependencies
 3. Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
@@ -11,7 +21,7 @@
 6. Flush caches `ddev drush cr`
 7. Run script with `ddev d11prepare`
 
-##  Preparation (Lando)
+###  Preparation (Lando)
 1. Run `composer install` to pull in current dependencies
 2. Add the script `d11prepare.sh` to the root project directory
 3. Start site with `lando start`
@@ -19,10 +29,10 @@
 5. Flush caches `lando drush cr`
 6. Run script in root `sh d11prepare.sh`
 
-##  Script operations
+###  Script operations
 The script will first ask whether the site is based on a VPR, Science or other boilerplate. It then attempts to make the follwoing updates
 
-###  Modules updated
+####  Modules updated
 - Drush
 - Webform (+adds patch - not needed once https://www.drupal.org/project/webform/issues/3526888 is in a release)
 - File Delete
@@ -35,17 +45,17 @@ The script will first ask whether the site is based on a VPR, Science or other b
 - UBC Portfolio modules (does not include CWL or custom modules)
 - UBC Recipes
 
-###  Additional updates
+####  Additional updates
 - Add and install the Upgrade Status module (if needed)
 - Update the core version requirement to VPR and Science portfolio child themes
 - Prompt you to add the core version requirement if you're using a custom theme
 - alter the recipe location to the root directory
 - alter the .gitignore to remove /web/recipes/ and add /recipes/
 
-###  Cleanup
+####  Cleanup
 You should see a large number of recipes files in /web/recipes/ - these should not be committed and can be safely discarded.
 
-##  Next Steps
+###  Next Steps
 1. Review and resolve the issues on the Upgrade Status page
 - /admin/reports/upgrade-status
 - Note that formtips will show as having an *Incompatible* local version, but that can be disregarded since we are straddling required versions. The updated version will be pulled in when core is updated.
