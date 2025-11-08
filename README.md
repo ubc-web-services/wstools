@@ -4,11 +4,11 @@
 1. Add audit.sh to your repo root
 2. Run `sh audit.sh` to exectute the script
 3. The script will output a list of:
-    - services from the .platform/services.yaml file
-    - a list of custom modules contained in web/modules/custom
+    - services from the `.platform/services.yaml` file
+    - a list of custom modules contained in `web/modules/custom`
     - composer dependencies not included in the boilerplate
     - patches in the composer file
-4. The results will also be written to a project_summary.md file in the project root.
+4. The results will also be written to a `project_summary.md` file in the project root.
 
 ## Update
 
