@@ -30,7 +30,7 @@
 6. Run script in root `sh d11prepare.sh`
 
 ###  Script operations
-The script will first ask whether the site is based on a VPR, Science or other boilerplate. It then attempts to make the follwoing updates
+The script will first ask whether the site is based on a VPR, Science or other boilerplate. It then attempts to make the following updates
 
 ####  Modules updated
 - Drush
