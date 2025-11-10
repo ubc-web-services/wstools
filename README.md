@@ -5,6 +5,7 @@
 2. Run `sh audit.sh` to exectute the script
 3. The script will output a list of:
     - services from the `.platform/services.yaml` file
+    - php version from the `.platform.app.yaml` file
     - a list of custom modules contained in `web/modules/custom`
     - composer dependencies not included in the boilerplate
     - patches in the composer file

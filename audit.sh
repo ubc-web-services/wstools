@@ -10,6 +10,7 @@
 set -euo pipefail
 
 SERVICES_FILE=".platform/services.yaml"
+PLATFORM_FILE=".platform.app.yaml"
 CUSTOM_MODULES_DIR="web/modules/custom"
 COMPOSER_FILE="composer.json"
 OUTPUT_FILE="project_summary.md"
@@ -47,7 +48,43 @@ fi
 echo_md ""
 
 #####################################
-# 2. Output custom module directories #
+# 2. Check and output php version #
+#####################################
+
+if [ -f "$PLATFORM_FILE" ]; then
+  echo_md "## .platform.app.yaml"
+  echo_md ""
+
+  # Extract 'type' key even if multiple YAML documents exist
+  TYPE_VALUE=$(yq -r 'select(has("type")) | .type' $PLATFORM_FILE 2>/dev/null | head -n 1)
+
+  if [ -n "$TYPE_VALUE" ] && [ "$TYPE_VALUE" != "null" ]; then
+    echo_md "- Type: $TYPE_VALUE"
+
+    # Only check PHP types
+    if [[ "$TYPE_VALUE" == php:* ]]; then
+      VERSION="${TYPE_VALUE#php:}"
+
+      # Compare numerically using sort -V
+      COMPARE=$(printf '%s\n8.3\n' "$VERSION" | sort -V | head -n1)
+
+      if [ "$COMPARE" != "8.3" ]; then
+        echo_md "⚠️ **Warning:** PHP $VERSION detected — upgrade to ≥ 8.3 recommended."
+      else
+        echo_md "✅ PHP $VERSION detected — version is OK."
+      fi
+    fi
+  else
+    echo_md "- ⚠️ No 'type' key found at the top level of .platform.app.yaml"
+  fi
+  echo_md ""
+else
+  echo_md "## .platform.app.yaml not found."
+  echo_md ""
+fi
+
+#####################################
+# 3. Output custom module directories #
 #####################################
 
 echo_md "## Custom Modules"
@@ -68,7 +105,7 @@ fi
 echo_md ""
 
 #####################################
-# 3. Composer require dependencies  #
+# 4. Composer require dependencies  #
 #####################################
 
 echo_md "## Composer Dependencies (require)"
@@ -193,7 +230,7 @@ if [[ -f "$COMPOSER_FILE" ]]; then
   echo_md ""
 
   ##########################################
-  # 4. Composer extra.patches (if present) #
+  # 5. Composer extra.patches (if present) #
   ##########################################
 
   echo_md "## Composer Patches (extra > patches)"
