@@ -104,7 +104,7 @@ chmod 666 web/sites/default/*services.yml
 <li>If no errors, perform the update<br>
 <code>composer update</code></li>
 <li>Run database updates again.<br>
-<code>lando drush updb</code></li>
+<code>ddev drush updb</code> OR <code>lando drush updb</code></li>
 <li>Reinstate permissions (optional on local)</li>
 </ul>
 <pre><code>chmod 777 web/sites/default
@@ -113,6 +113,12 @@ chmod 666 web/sites/default/*services.yml
 
 </code></pre>
 <ol start="4">
+<li>Update DDEV recipe</li>
+</ol>
+<ul>
+<li><code>ddev config</code> and choose Drupal11 recipe</li>
+</ul>
+<ol start="5">
 <li>Commit all changes</li>
 </ol>
 </div>

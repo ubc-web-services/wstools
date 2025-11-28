@@ -106,7 +106,7 @@ composer require 'drupal/core-recommended:^11' \
 -   If no errors, perform the update
     `composer update`
 -   Run database updates again.
-    `lando drush updb`
+    `ddev drush updb` OR `lando drush updb`
 -   Reinstate permissions (optional on local)
 
 ```
@@ -116,4 +116,7 @@ chmod 666 web/sites/default/*services.yml
 
 ```
 
-4.  Commit all changes
+4. Update DDEV recipe
+-  `ddev config` and choose Drupal11 recipe
+
+5.  Commit all changes
