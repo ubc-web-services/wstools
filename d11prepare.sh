@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Update based on Project Type selected:
+# --- Update based on Project Type selected ---
 ## Set up the update options
 run_updates() {
     echo "Choose a project type:"
@@ -11,19 +11,19 @@ run_updates() {
             1)
                 echo "✅ Updating custom modules..."
                 composer require ubc-web-services/kraken ubc-web-services/ubc_add_to_calendar ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
-                return 0
+                break
                 ;;
             2)
                 echo "✅ Updating custom VPR modules..."
                 composer require ubc-web-services/kraken-vpr:dev-master ubc-web-services/ubc_add_to_calendar ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
                 INFO_FILE="web/themes/custom/vpr/vpr.info.yml"
-                return 0
+                break
                 ;;
             3)
                 echo "✅ Updating custom Science modules..."
                 composer require ubc-web-services/kraken-science ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules ubc-web-services/ubc_science_shared_config
                 INFO_FILE="web/themes/custom/science/science.info.yml"
-                return 0
+                break
                 ;;
             4)
                 echo "Exiting..."
@@ -39,22 +39,20 @@ run_updates() {
 ## Run updates
 run_updates
 
-# Update the core version requirement if we can
+## Update the core version requirement if we can
 if [[ -f "$INFO_FILE" ]]; then
     sed -i '' "/^core_version_requirement:/{
         s/.*/core_version_requirement: '>=10'/
     }" "$INFO_FILE"
-    echo "✅ Core version requirement updated"
+    echo "Core version requirement update was attempted"
 else
   echo "❌ Please update the core_version_requirement value in the .info file manually. Correct value: '>=10'."
 fi
 
-# Add webform patch
-COMPOSER_FILE="composer.json"
-PATCH_KEY="drupal/webform"
-PATCH_DESCRIPTION="Patches help key in node.type.webform to use null instead of empty value - required for installing via recipe"
-PATCH_URL="https://raw.githubusercontent.com/ubc-web-services/patches/refs/heads/master/webform_node-help-value.patch"
 
+# --- Recipes ---
+COMPOSER_FILE="composer.json"
+TMP_FILE=$(mktemp)
 ## Check if jq is installed
 if ! command -v jq &> /dev/null; then
     echo "❌ jq is not installed."
@@ -68,10 +66,7 @@ if [[ ! -f "$COMPOSER_FILE" ]]; then
     exit 1
 fi
 
-## Make a single tmp file we’ll reuse
-TMP_FILE=$(mktemp)
-
-## Step 1: Fix web/recipes keys
+## Fix web/recipes keys in composer file
 jq '
   if .extra["installer-paths"] != null then
     .extra["installer-paths"] |= with_entries(
@@ -88,24 +83,16 @@ jq '
 
 echo "✅ Updated installer-path keys from web/recipes/* → recipes/*."
 
-## Step 2: Add patch if missing
-if jq -e --arg key "$PATCH_KEY" '.extra.patches[$key]' "$COMPOSER_FILE" >/dev/null; then
-    echo "✅ Patch for $PATCH_KEY already exists. No changes made."
+## Delete old web/recipes directory if it exists
+RECIPES_DIR="web/recipes"
+
+if [[ -d "$RECIPES_DIR" ]]; then
+    echo "🗑️  Found $RECIPES_DIR — deleting..."
+    rm -rf "$RECIPES_DIR"
+    echo "✅ Deleted old $RECIPES_DIR."
 else
-    jq --arg key "$PATCH_KEY" \
-       --arg desc "$PATCH_DESCRIPTION" \
-       --arg url "$PATCH_URL" \
-       'if .extra.patches == {} or (.extra.patches | type == "null")
-        then .extra.patches = { ($key): { ($desc): $url } }
-        else .extra.patches[$key] += { ($desc): $url }
-        end' "$COMPOSER_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$COMPOSER_FILE"
-
-    echo "✅ Patch for $PATCH_KEY has been added."
+    echo "ℹ️  No $RECIPES_DIR directory found. Skipping."
 fi
-
-# Update / Add dependencies
-composer require drush/drush 'drupal/formtips:^1.11||^2.0' drupal/upgrade_status 'drupal/webform:^6.3@beta' 'drupal/linkit:^7.0' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev'
-lando drush pm:enable upgrade_status
 
 ## Update .gitignore if it has /web/recipes/
 if [[ -f ".gitignore" ]]; then
@@ -119,4 +106,30 @@ else
     echo "ℹ️  No .gitignore file found, skipping"
 fi
 
-echo "All done - make sure to delete any recipes detected inside the web directory and check your theme for the core_version_requirement: '>=10' in the .info file"
+
+# --- Update / Add dependencies ---
+composer require 'drush/drush' 'drupal/formtips:^1.11||^2.0' 'drupal/upgrade_status' 'drupal/webform:^6.3@beta' 'drupal/linkit:7.0.10' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev' 'ubc-web-services/ckeditor5_fullscreen'
+
+## Check for drupal/editor_advanced_link and pin to version 2.3.1
+ADVLINK="drupal/editor_advanced_link"
+TARGET_VERSION="2.3.1"
+
+echo "Checking for $ADVLINK..."
+
+## Look to see if the module is declared in packages
+if composer show --locked | grep -q "^$ADVLINK "; then
+    echo "✅ $ADVLINK is installed. Updating to version $TARGET_VERSION..."
+    composer require "$ADVLINK:$TARGET_VERSION"
+else
+    echo "ℹ️  $ADVLINK is not installed. Skipping."
+fi
+
+## Run any database updates
+lando drush updb -y
+
+## Enable Upgrade Status module
+lando drush pm:enable upgrade_status
+
+
+# --- End ---
+echo "All done - you should check that the core_version_requirement in the active [theme].info.yml is set to: core_version_requirement: '>=10'."
