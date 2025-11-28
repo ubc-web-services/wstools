@@ -11,83 +11,109 @@
     - patches in the composer file
 4. The results will also be written to a `project_summary.md` file in the project root.
 
-## Update
+## Update Drupal 10.x -> Drupal 11.2
 
-###  Preparation DDEV (Preferred)
-1. Add ddev to the project `ddev config` (defaults are fine)
-2. Run `composer install` to pull in current dependencies
-3. Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
-4. Start the site with `ddev start`
-5. Import the db with `ddev import-db < [databasename]`
-6. Flush caches `ddev drush cr`
-7. Run script with `ddev d11prepare`
+[repo here](https://github.com/ubc-web-services/d11upgrade)
 
-###  Preparation (Lando)
-1. Run `composer install` to pull in current dependencies
-2. Add the script `d11prepare.sh` to the root project directory
-3. Start site with `lando start`
-4. Import the db with `lando db-import [databasename]`
-5. Flush caches `lando drush cr`
-6. Run script in root `sh d11prepare.sh`
+### Preparation DDEV (Preferred)
 
-###  Script operations
+1.  Add ddev to the project `ddev config` (defaults are fine for projects without additional services like solr)
+2.  Run `composer install` to pull in current dependencies
+3.  Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
+4.  Start the site with `ddev start`
+5.  Import the db with `ddev import-db < [databasename]`
+6.  Flush caches `ddev drush cr`
+7.  Run script with `ddev d11prepare`
+
+### Preparation (Lando)
+
+1.  Run `composer install` to pull in current dependencies
+2.  Add the script `d11prepare.sh` to the root project directory
+3.  Start site with `lando start`
+4.  Import the db with `lando db-import [databasename]`
+5.  Flush caches `lando drush cr`
+6.  Run script in root `sh d11prepare.sh`
+
+### Script operations
+
 The script will first ask whether the site is based on a VPR, Science or other boilerplate. It then attempts to make the following updates
 
-####  Modules updated
-- Drush
-- Webform (+adds patch - not needed once https://www.drupal.org/project/webform/issues/3526888 is in a release)
-- File Delete
-- Formtips (needs to straddle versions: \^1.11||\^2.0)
-- Gin (needs to straddle versions: \^4.1||\^5.0)
-- Gin Toolbar (needs to straddle versions: \^2.1||\^3.0)
-- Image Widget Crop
-- Linkit
-- Linkit Media Library
-- UBC Portfolio modules (does not include CWL or custom modules)
-- UBC Recipes
+#### Modules updated
 
-####  Additional updates
-- Add and install the Upgrade Status module (if needed)
-- Update the core version requirement to VPR and Science portfolio child themes
-- Prompt you to add the core version requirement if you're using a custom theme
-- alter the recipe location to the root directory
-- alter the .gitignore to remove /web/recipes/ and add /recipes/
+-   Drush
+-   Webform
+-   Editor Advanced Link (only if in composer file, pinned to 2.3.1)
+-   File Delete
+-   CKEditor5 Fullscreen
+-   Formtips (needs to straddle versions: \^1.11||\^2.0)
+-   Gin (needs to straddle versions: \^4.1||\^5.0)
+-   Gin Toolbar (needs to straddle versions: \^2.1||\^3.0)
+-   Image Widget Crop
+-   Linkit (pinned to 7.0.10)
+-   Linkit Media Library
+-   UBC Portfolio modules (does not include CWL or custom modules)
+-   UBC Recipes
 
-####  Cleanup
-You should see a large number of recipes files in /web/recipes/ - these should not be committed and can be safely discarded.
+#### Additional updates
 
-###  Next Steps
-1. Review and resolve the issues on the Upgrade Status page
-- /admin/reports/upgrade-status
-- Note that formtips will show as having an *Incompatible* local version, but that can be disregarded since we are straddling required versions. The updated version will be pulled in when core is updated.
-2. Backup work
-- Run database updates to ensure the latest changes are in place.
-`ddev drush updb` OR `lando drush updb`
-- Export database in case you want to roll back.
-`ddev export-db --file=db.sql.gz` OR `lando db-export`
-3. Run Update: also see [Official Docs](https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11)
-- Update permissions.
+-   Add and install the Upgrade Status module (if needed)
+-   Update the core version requirement to VPR and Science portfolio child themes
+-   Prompt you to add the core version requirement if you’re using a custom theme
+-   alter the recipe location to the root directory
+-   alter the .gitignore to remove /web/recipes/ and add /recipes/
+-   delete the old recipes stored in /web/recipes from the local project
+
+#### Cleanup
+
+-  Make sure to commit any changes (ie. ddev, .gitignore, composer) once you are ready to proceed
+
+### Next Steps
+
+1.  Review and resolve the issues on the Upgrade Status page
+
+-   /admin/reports/upgrade-status
+-   Note that formtips will show as having an _Incompatible_ local version, but that can be disregarded since we are straddling required versions. The updated version will be pulled in when core is updated.
+
+2.  Backup work
+
+-   Run database updates to ensure the latest changes are in place.
+    `ddev drush updb` OR `lando drush updb`
+-   Export database in case you want to roll back.
+    `ddev export-db --file=db.sql.gz` OR `ddev snapshot` OR `lando db-export`
+
+3.  Run Update: also see [Official Docs](https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11)
+
+-   Update permissions.
+
 ```
 chmod 777 web/sites/default
 chmod 666 web/sites/default/*settings.php
 chmod 666 web/sites/default/*services.yml
+
 ```
-- Change core without updating.
+
+-   Change core without updating.
+
 ```
 composer require 'drupal/core-recommended:^11' \
 'drupal/core-composer-scaffold:^11' \
 'drupal/core-project-message:^11' --no-update
+
 ```
-- Perform the update dry-run
-`composer update --dry-run`
-- If no errors, perform the update
-`composer update`
-- Run database updates again.
-`lando drush updb`
-- Reinstate permissions (optional on local)
+
+-   Perform the update dry-run
+    `composer update --dry-run`
+-   If no errors, perform the update
+    `composer update`
+-   Run database updates again.
+    `lando drush updb`
+-   Reinstate permissions (optional on local)
+
 ```
 chmod 777 web/sites/default
 chmod 666 web/sites/default/*settings.php
 chmod 666 web/sites/default/*services.yml
+
 ```
-4. Commit all changes
+
+4.  Commit all changes
