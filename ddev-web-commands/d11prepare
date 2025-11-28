@@ -4,7 +4,7 @@
 ## Set up the update options
 run_updates() {
     echo "Choose a project type:"
-    OPTIONS=("Custom" "VPR" "Science" "Exit")
+    OPTIONS=("Custom" "VPR" "Science" "APSC" "Exit")
 
     select OPT in "${OPTIONS[@]}"; do
         case $REPLY in
@@ -26,6 +26,12 @@ run_updates() {
                 break
                 ;;
             4)
+                echo "✅ Updating custom APSC modules..."
+                composer require ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
+                INFO_FILE="web/themes/custom/kraken/kraken.info.yml"
+                break
+                ;;
+            5)
                 echo "Exiting..."
                 exit 0
                 ;;
@@ -108,7 +114,7 @@ fi
 
 
 # --- Update / Add dependencies ---
-composer require 'drush/drush' 'drupal/formtips:^1.11||^2.0' 'drupal/upgrade_status' 'drupal/webform:^6.3@beta' 'drupal/linkit:7.0.10' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev' 'ubc-web-services/ckeditor5_fullscreen'
+composer require 'drush/drush' 'drupal/formtips:^1.11||^2.0' 'drupal/upgrade_status' 'drupal/webform:^6.3@beta' 'drupal/linkit:7.0.10' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev' 'drupal/ckeditor5_fullscreen'
 
 ## Check for drupal/editor_advanced_link and pin to version 2.3.1
 ADVLINK="drupal/editor_advanced_link"
