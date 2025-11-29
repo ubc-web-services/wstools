@@ -104,6 +104,7 @@ fi
 if [[ -f ".gitignore" ]]; then
     if grep -q "^/web/recipes/" .gitignore; then
         sed -i.bak 's#^/web/recipes/#/recipes/#' .gitignore
+        rm -f .gitignore.bak
         echo "✅ Updated .gitignore entries from /web/recipes/ → /recipes/"
     else
         echo "ℹ️  No /web/recipes/ entries found in .gitignore"
