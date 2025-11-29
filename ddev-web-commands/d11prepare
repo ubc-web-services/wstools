@@ -152,6 +152,14 @@ else
     fi
 fi
 
+## Remove audit.sh if it exists
+if [[ -f "audit.sh" ]]; then
+    rm -f audit.sh
+    echo "✅ Removed audit.sh file"
+else
+    echo "ℹ️  No audit.sh file found, skipping"
+fi
+
 ## Remove project_summary.md if it exists
 if [[ -f "project_summary.md" ]]; then
     rm -f project_summary.md
