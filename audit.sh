@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# project_info.sh
+# audit.sh
 # Summarizes key Drupal project info:
 #  1. .platform/services.yaml types
 #  2. Custom module directories
