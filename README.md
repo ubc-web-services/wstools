@@ -15,7 +15,7 @@
 
 [repo here](https://github.com/ubc-web-services/d11upgrade)
 
-### Preparation DDEV (Preferred)
+### Prepare DDEV
 
 1.  Add ddev to the project `ddev config` (defaults are fine for projects without additional services like solr)
 2.  Run `composer install` to pull in current dependencies
@@ -24,15 +24,6 @@
 5.  Import the db with `ddev import-db < [databasename]`
 6.  Flush caches `ddev drush cr`
 7.  Run script with `ddev d11prepare`
-
-### Preparation (Lando)
-
-1.  Run `composer install` to pull in current dependencies
-2.  Add the script `d11prepare.sh` to the root project directory
-3.  Start site with `lando start`
-4.  Import the db with `lando db-import [databasename]`
-5.  Flush caches `lando drush cr`
-6.  Run script in root `sh d11prepare.sh`
 
 ### Script operations
 
@@ -65,6 +56,16 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 
 #### Cleanup
 
+-  The following files will be deleted:
+   -  .lando
+   -  landoquickstart.sh
+   -  LICENSE
+   -  project_summary.md (if present)
+-  If cypress is the only node package in the root package.json, these will be deleted:
+   -  /cypress (directory and contents)
+   -  cypress.json
+   -  package.json
+   -  package-lock.json
 -  Make sure to commit any changes (ie. ddev, .gitignore, composer) once you are ready to proceed
 
 ### Next Steps
