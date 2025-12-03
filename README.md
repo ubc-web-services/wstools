@@ -44,7 +44,6 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 -   Linkit Media Library
 -   UBC Portfolio modules (does not include CWL or custom modules)
 -   UBC Recipes
--   Copy theme colour variables from theme to ubc_ckeditor_widgets module
 
 #### Additional updates
 
@@ -62,8 +61,8 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
    -  landoquickstart.sh
    -  LICENSE
    -  project_summary.md (if present)
-   -  If cwl modules are not in composer, simplessamlphp directory will be deleted
--  If cypress is the only node package in the root package.json, these will be deleted:
+   -  simplessamlphp directory (conditional - only if cwl modules are not in composer)
+-  If cypress is the only node package in the root package.json:
    -  /cypress (directory and contents)
    -  cypress.json
    -  package.json

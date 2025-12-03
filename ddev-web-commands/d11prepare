@@ -30,30 +30,18 @@ run_updates() {
                 echo "✅ Updating custom VPR modules..."
                 composer require ubc-web-services/kraken-vpr:dev-master ubc-web-services/ubc_add_to_calendar ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
                 INFO_FILE="web/themes/custom/vpr/vpr.info.yml"
-                PRIMARY_COLOUR=$(drush cget vpr.settings clf_theme_unit_colour --format=string 2>/dev/null)
-                SECONDARY_COLOUR=$(drush cget vpr.settings clf_theme_secondary_colour --format=string 2>/dev/null)
-                TERTIARY_COLOUR=$(drush cget vpr.settings clf_theme_tertiary_colour --format=string 2>/dev/null)
-                ACCENT_COLOUR=$(drush cget vpr.settings clf_theme_accent_colour --format=string 2>/dev/null)
                 break
                 ;;
             3)
                 echo "✅ Updating custom Science modules..."
                 composer require ubc-web-services/kraken-science ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules ubc-web-services/ubc_science_shared_config
                 INFO_FILE="web/themes/custom/science/science.info.yml"
-                PRIMARY_COLOUR=$(drush cget science.settings clf_theme_unit_colour --format=string 2>/dev/null)
-                SECONDARY_COLOUR=$(drush cget science.settings clf_theme_secondary_colour --format=string 2>/dev/null)
-                TERTIARY_COLOUR=$(drush cget science.settings clf_theme_tertiary_colour --format=string 2>/dev/null)
-                ACCENT_COLOUR=$(drush cget science.settings clf_theme_accent_colour --format=string 2>/dev/null)
                 break
                 ;;
             4)
                 echo "✅ Updating custom APSC modules..."
                 composer require ubc-web-services/ubc_chosen_style_tweaks ubc-web-services/ubc_ckeditor_widgets ubc-web-services/ubc_d8_config_modules
                 INFO_FILE="web/themes/custom/kraken/kraken.info.yml"
-                PRIMARY_COLOUR=$(drush cget kraken.settings clf_theme_unit_colour --format=string 2>/dev/null)
-                SECONDARY_COLOUR=$(drush cget kraken.settings clf_theme_secondary_colour --format=string 2>/dev/null)
-                TERTIARY_COLOUR=$(drush cget kraken.settings clf_theme_tertiary_colour --format=string 2>/dev/null)
-                ACCENT_COLOUR=$(drush cget kraken.settings clf_theme_accent_colour --format=string 2>/dev/null)
                 break
                 ;;
             5)
@@ -163,28 +151,6 @@ if [[ -f "$COMPOSER_FILE" ]]; then
 else
     echo "⚠️ composer.json not found — skipping SAML check."
 fi
-
-
-# --- Copy old theme colour settings to ubc_ckeditor_widgets settings ---
-## Apply to ubc_ckeditor_widgets.settings
-## Only set values that actually exist (avoid overwriting with empty strings)
-if [[ -n "$PRIMARY_COLOUR" ]]; then
-  drush cset ubc_ckeditor_widgets.settings primary_color "$PRIMARY_COLOUR" -y
-fi
-
-if [[ -n "$SECONDARY_COLOUR" ]]; then
-  drush cset ubc_ckeditor_widgets.settings secondary_color "$SECONDARY_COLOUR" -y
-fi
-
-if [[ -n "$TERTIARY_COLOUR" ]]; then
-  drush cset ubc_ckeditor_widgets.settings tertiary_color "$TERTIARY_COLOUR" -y
-fi
-
-if [[ -n "$ACCENT_COLOUR" ]]; then
-  drush cset ubc_ckeditor_widgets.settings accent_color "$ACCENT_COLOUR" -y
-fi
-
-echo "🎨 Theme color values copied to ubc_ckeditor_widgets.settings"
 
 
 # --- Clean up outdated dependencies ---
