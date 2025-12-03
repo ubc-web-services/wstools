@@ -12,7 +12,7 @@
   <div class="stackedit__html">
 <h1 id="update-drupal-10.x---drupal-11.2">Update Drupal 10.x -&gt; Drupal 11.2</h1>
 <p><a href="https://github.com/ubc-web-services/d11upgrade">repo here</a></p>
-<h2 id="preparation-ddev-preferred">Preparation DDEV (Preferred)</h2>
+<h2 id="preparation-ddev-preferred">Prepare DDEV</h2>
 <ol>
 <li>Add ddev to the project <code>ddev config</code> (defaults are fine for projects without additional services like solr)</li>
 <li>Run <code>composer install</code> to pull in current dependencies</li>
@@ -21,15 +21,6 @@
 <li>Import the db with <code>ddev import-db &lt; [databasename]</code></li>
 <li>Flush caches <code>ddev drush cr</code></li>
 <li>Run script with <code>ddev d11prepare</code></li>
-</ol>
-<h2 id="preparation-lando">Preparation (Lando)</h2>
-<ol>
-<li>Run <code>composer install</code> to pull in current dependencies</li>
-<li>Add the script <code>d11prepare.sh</code> to the root project directory</li>
-<li>Start site with <code>lando start</code></li>
-<li>Import the db with <code>lando db-import [databasename]</code></li>
-<li>Flush caches <code>lando drush cr</code></li>
-<li>Run script in root <code>sh d11prepare.sh</code></li>
 </ol>
 <h2 id="script-operations">Script operations</h2>
 <p>The script will first ask whether the site is based on a VPR, Science, APSC or other boilerplate. It then attempts to make the following updates</p>
@@ -60,6 +51,23 @@
 </ul>
 <h3 id="cleanup">Cleanup</h3>
 <ul>
+<li>The following files will be deleted:
+<ul>
+<li>.lando</li>
+<li>landoquickstart.sh</li>
+<li>LICENSE</li>
+<li>project_summary.md (if present)</li>
+<li>simplessamlphp directory (conditional - only if cwl modules are not in composer)</li>
+</ul>
+</li>
+<li>If cypress is the only node package in the root package.json:
+<ul>
+<li>/cypress (directory and contents)</li>
+<li>cypress.json</li>
+<li>package.json</li>
+<li>package-lock.json</li>
+</ul>
+</li>
 <li>Make sure to commit any changes (ie. ddev, .gitignore, composer) once you are ready to proceed</li>
 </ul>
 <h2 id="next-steps">Next Steps</h2>

@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Usage: d11prepare
+# Example: ddev d11prepare
+# Description: Updates packages, themes, files, and cleanup:
+#  1. Conditional project type updates
+#  2. Core version requirement for theme
+#  3. Update recipes location and removal from prior location
+#  4. Remove cypress and supporting files if conditions met
+#  5. Removes lando and audit files
+#  6. Global dependency updates
+#  7. Update database
+#  8. Install upgrade_status
+
+
 # --- Update based on Project Type selected ---
 ## Set up the update options
 run_updates() {
@@ -112,6 +125,92 @@ if [[ -f ".gitignore" ]]; then
 else
     echo "ℹ️  No .gitignore file found, skipping"
 fi
+
+
+# --- Simplesamlphp ---
+## Delete the simplesamlphp directory if CWL modules are not in the composer required modules
+SIMPLESAML_DIR="simplesamlphp"
+if [[ -f "$COMPOSER_FILE" ]]; then
+    # Check for either module inside "require"
+    HAS_UBC=$(jq -r '.require["ubc-web-services/ubc_saml_auth10"] // empty' "$COMPOSER_FILE")
+    HAS_SSP=$(jq -r '.require["simplesamlphp/simplesamlphp"] // empty' "$COMPOSER_FILE")
+
+    if [[ -z "$HAS_UBC" && -z "$HAS_SSP" ]]; then
+        echo "❌ Required SAML modules not found in composer.json"
+
+        if [[ -d "$SIMPLESAML_DIR" ]]; then
+            echo "🗑️  Deleting $SIMPLESAML_DIR directory..."
+            rm -rf "$SIMPLESAML_DIR"
+            echo "✅ Directory deleted."
+        else
+            echo "ℹ️ Directory $SIMPLESAML_DIR does not exist — nothing to delete."
+        fi
+    else
+        echo "✅ SAML module found in composer.json — keeping directory."
+    fi
+else
+    echo "⚠️ composer.json not found — skipping SAML check."
+fi
+
+
+# --- Clean up outdated dependencies ---
+## Ensure package.json exists
+if [[ ! -f "package.json" ]]; then
+  echo "ℹ️ package.json not found. Skipping Cypress cleanup."
+else
+    # Extract devDependencies keys using jq
+    if command -v jq >/dev/null 2>&1; then
+        DEV_KEYS=$(jq -r '.devDependencies | keys[]?' package.json)
+    else
+        # Fallback if jq is not installed
+        DEV_KEYS=$(grep -o '"devDependencies": {[^}]*}' -A50 package.json \
+          | sed -n 's/.*"devDependencies": {//p; /}/q' \
+          | grep -o '"[^"]*"' \
+          | sed 's/"//g')
+    fi
+
+    # Count how many devDependencies exist
+    COUNT=$(echo "$DEV_KEYS" | sed '/^$/d' | wc -l | tr -d ' ')
+
+    # Check if Cypress is the only devDependency
+    if [[ "$COUNT" -eq 1 && "$DEV_KEYS" == "cypress" ]]; then
+        echo "🧹 Cypress is the only devDependency — cleaning up..."
+
+        rm -f package.json
+        rm -f package-lock.json
+        rm -f cypress.json
+
+        if [[ -d "cypress" ]]; then
+            rm -rf cypress
+        fi
+
+        echo "✅ Cleanup completed."
+    else
+        echo "ℹ️ Other devDependencies found — leaving project files intact."
+        echo "   devDependencies found: $DEV_KEYS"
+    fi
+fi
+
+## Remove audit.sh if it exists
+if [[ -f "audit.sh" ]]; then
+    rm -f audit.sh
+    echo "✅ Removed audit.sh file"
+else
+    echo "ℹ️  No audit.sh file found, skipping"
+fi
+
+## Remove project_summary.md if it exists
+if [[ -f "project_summary.md" ]]; then
+    rm -f project_summary.md
+    echo "✅ Removed project_summary.md file"
+else
+    echo "ℹ️  No project_summary.md file found, skipping"
+fi
+
+## Remove .lando file
+rm -f .lando.yml
+rm -f landoquickstart.sh
+rm -f LICENSE
 
 
 # --- Update / Add dependencies ---

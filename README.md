@@ -15,7 +15,7 @@
 
 [repo here](https://github.com/ubc-web-services/d11upgrade)
 
-### Preparation DDEV (Preferred)
+### Prepare DDEV
 
 1.  Add ddev to the project `ddev config` (defaults are fine for projects without additional services like solr)
 2.  Run `composer install` to pull in current dependencies
@@ -24,15 +24,6 @@
 5.  Import the db with `ddev import-db < [databasename]`
 6.  Flush caches `ddev drush cr`
 7.  Run script with `ddev d11prepare`
-
-### Preparation (Lando)
-
-1.  Run `composer install` to pull in current dependencies
-2.  Add the script `d11prepare.sh` to the root project directory
-3.  Start site with `lando start`
-4.  Import the db with `lando db-import [databasename]`
-5.  Flush caches `lando drush cr`
-6.  Run script in root `sh d11prepare.sh`
 
 ### Script operations
 
@@ -65,6 +56,17 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 
 #### Cleanup
 
+-  The following files will be deleted:
+   -  .lando
+   -  landoquickstart.sh
+   -  LICENSE
+   -  project_summary.md (if present)
+   -  simplessamlphp directory (conditional - only if cwl modules are not in composer)
+-  If cypress is the only node package in the root package.json:
+   -  /cypress (directory and contents)
+   -  cypress.json
+   -  package.json
+   -  package-lock.json
 -  Make sure to commit any changes (ie. ddev, .gitignore, composer) once you are ready to proceed
 
 ### Next Steps
@@ -79,7 +81,7 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 -   Run database updates to ensure the latest changes are in place.
     `ddev drush updb` OR `lando drush updb`
 -   Export database in case you want to roll back.
-    `ddev export-db --file=db.sql.gz` OR `ddev snapshot` OR `lando db-export`
+    `ddev export-db --file=db.sql.gz` OR `ddev snapshot`
 
 3.  Run Update: also see [Official Docs](https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11)
 
@@ -106,7 +108,7 @@ composer require 'drupal/core-recommended:^11' \
 -   If no errors, perform the update
     `composer update`
 -   Run database updates again.
-    `ddev drush updb` OR `lando drush updb`
+    `ddev drush updb`
 -   Reinstate permissions (optional on local)
 
 ```
@@ -120,3 +122,14 @@ chmod 666 web/sites/default/*services.yml
 -  `ddev config` and choose Drupal11 recipe
 
 5.  Commit all changes
+
+6. Update database
+- `ddev drush updb`
+
+7. Disable Upgrade Status module
+- `ddev drush pmu upgrade_status `
+
+8. Export config
+- `ddev drush cex -y`
+
+9. Commit all changes
