@@ -44,6 +44,7 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 -   Linkit Media Library
 -   UBC Portfolio modules (does not include CWL or custom modules)
 -   UBC Recipes
+-   Copy theme colour variables from theme to ubc_ckeditor_widgets module
 
 #### Additional updates
 
@@ -61,6 +62,7 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
    -  landoquickstart.sh
    -  LICENSE
    -  project_summary.md (if present)
+   -  If cwl modules are not in composer, simplessamlphp directory will be deleted
 -  If cypress is the only node package in the root package.json, these will be deleted:
    -  /cypress (directory and contents)
    -  cypress.json
@@ -80,7 +82,7 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 -   Run database updates to ensure the latest changes are in place.
     `ddev drush updb` OR `lando drush updb`
 -   Export database in case you want to roll back.
-    `ddev export-db --file=db.sql.gz` OR `ddev snapshot` OR `lando db-export`
+    `ddev export-db --file=db.sql.gz` OR `ddev snapshot`
 
 3.  Run Update: also see [Official Docs](https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11)
 
@@ -107,7 +109,7 @@ composer require 'drupal/core-recommended:^11' \
 -   If no errors, perform the update
     `composer update`
 -   Run database updates again.
-    `ddev drush updb` OR `lando drush updb`
+    `ddev drush updb`
 -   Reinstate permissions (optional on local)
 
 ```
@@ -121,3 +123,14 @@ chmod 666 web/sites/default/*services.yml
 -  `ddev config` and choose Drupal11 recipe
 
 5.  Commit all changes
+
+6. Update database
+- `ddev drush updb`
+
+7. Disable Upgrade Status module
+- `ddev drush pmu upgrade_status `
+
+8. Export config
+- `ddev drush cex -y`
+
+9. Commit all changes
