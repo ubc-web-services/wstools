@@ -17,7 +17,7 @@
 
 ### Prepare DDEV
 
-1.  Add ddev to the project `ddev config` (defaults are fine for projects without additional services like solr)
+1.  Add ddev to the project `ddev config` (most defaults are fine for projects without additional services like solr), use `drupal11` recipe
 2.  Run `composer install` to pull in current dependencies
 3.  Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
 4.  Start the site with `ddev start`
