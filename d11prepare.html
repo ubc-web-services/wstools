@@ -83,9 +83,9 @@
 </ol>
 <ul>
 <li>Run database updates to ensure the latest changes are in place.<br>
-<code>ddev drush updb</code> OR <code>lando drush updb</code></li>
+<code>ddev drush updb</code></li>
 <li>Export database in case you want to roll back.<br>
-<code>ddev export-db --file=db.sql.gz</code> OR <code>ddev snapshot</code> OR <code>lando db-export</code></li>
+<code>ddev export-db --file=db.sql.gz</code> OR <code>ddev snapshot</code></li>
 </ul>
 <ol start="3">
 <li>Run Update: also see <a href="https://www.drupal.org/docs/upgrading-drupal/upgrading-from-drupal-8-or-later/how-to-upgrade-from-drupal-10-to-drupal-11">Official Docs</a></li>
@@ -112,7 +112,7 @@ chmod 666 web/sites/default/*services.yml
 <li>If no errors, perform the update<br>
 <code>composer update</code></li>
 <li>Run database updates again.<br>
-<code>ddev drush updb</code> OR <code>lando drush updb</code></li>
+<code>ddev drush updb</code></li>
 <li>Reinstate permissions (optional on local)</li>
 </ul>
 <pre><code>chmod 777 web/sites/default
