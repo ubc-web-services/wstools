@@ -134,8 +134,9 @@ if [[ -f "$COMPOSER_FILE" ]]; then
     # Check for either module inside "require"
     HAS_UBC=$(jq -r '.require["ubc-web-services/ubc_saml_auth10"] // empty' "$COMPOSER_FILE")
     HAS_SSP=$(jq -r '.require["simplesamlphp/simplesamlphp"] // empty' "$COMPOSER_FILE")
+    HAS_UCA=$(jq -r '.require["ubc-web-services/ubc_cwl_auth"] // empty' "$COMPOSER_FILE")
 
-    if [[ -z "$HAS_UBC" && -z "$HAS_SSP" ]]; then
+    if [[ -z "$HAS_UBC" && -z "$HAS_SSP" && -z "$HAS_UCA" ]]; then
         echo "❌ Required SAML modules not found in composer.json"
 
         if [[ -d "$SIMPLESAML_DIR" ]]; then

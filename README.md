@@ -79,7 +79,7 @@ The script will first ask whether the site is based on a VPR, Science, APSC or o
 2.  Backup work
 
 -   Run database updates to ensure the latest changes are in place.
-    `ddev drush updb` OR `lando drush updb`
+    `ddev drush updb`
 -   Export database in case you want to roll back.
     `ddev export-db --file=db.sql.gz` OR `ddev snapshot`
 
