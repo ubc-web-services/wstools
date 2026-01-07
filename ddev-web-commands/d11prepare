@@ -69,6 +69,57 @@ else
 fi
 
 
+# --- Swap placement of Platform deploy commands ---
+## Set up the update options
+set -euo pipefail
+
+PLATFORM_FILE=".platform.app.yaml"
+PLATFORM_TMP="$(mktemp)"
+UPDB="drush -y updb"
+CR="drush -y cr"
+
+if [[ ! -f "$PLATFORM_FILE" ]]; then
+  echo "Error: $PLATFORM_FILE does not exist."
+  exit 1
+fi
+
+line_updb=$(grep -Fn "$UPDB" "$PLATFORM_FILE" | cut -d: -f1 || true)
+line_cr=$(grep -Fn "$CR" "$PLATFORM_FILE" | cut -d: -f1 || true)
+
+if [[ -z "$line_updb" || -z "$line_cr" ]]; then
+  echo "One or both required Platform deploy commands are missing."
+  exit 1
+fi
+
+# If already correct, exit early
+if (( line_updb < line_cr )); then
+  echo "Platform deploy commands already in correct order."
+  exit 0
+fi
+
+echo "Rewriting $PLATFORM_FILE to swap Platform deploy command order"
+
+awk -v u="$line_updb" -v c="$line_cr" '
+{
+  lines[NR] = $0
+}
+END {
+  t = lines[u]
+  lines[u] = lines[c]
+  lines[c] = t
+
+  for (i = 1; i <= NR; i++) {
+    print lines[i]
+  }
+}
+' "$PLATFORM_FILE" > "$PLATFORM_TMP"
+
+cat "$PLATFORM_TMP" > "$PLATFORM_FILE"
+rm "$PLATFORM_TMP"
+
+echo "Platform deploy command rewritten successfully."
+
+
 # --- Recipes ---
 COMPOSER_FILE="composer.json"
 TMP_FILE=$(mktemp)
