@@ -5,12 +5,13 @@
 # Description: Updates packages, themes, files, and cleanup:
 #  1. Conditional project type updates
 #  2. Core version requirement for theme
-#  3. Update recipes location and removal from prior location
-#  4. Remove cypress and supporting files if conditions met
-#  5. Removes lando and audit files
-#  6. Global dependency updates
-#  7. Update database
-#  8. Install upgrade_status
+#  3. Update build hook in .platform.app.yaml
+#  4. Update recipes location and removal from prior location
+#  5. Remove cypress and supporting files if conditions met
+#  6. Removes lando and audit files
+#  7. Global dependency updates
+#  8. Update database
+#  9. Install upgrade_status
 
 
 # --- Update based on Project Type selected ---
@@ -94,7 +95,6 @@ fi
 # If already correct, exit early
 if (( line_updb < line_cr )); then
   echo "Platform deploy commands already in correct order."
-  exit 0
 fi
 
 echo "Rewriting $PLATFORM_FILE to swap Platform deploy command order"
