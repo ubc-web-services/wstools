@@ -5,12 +5,13 @@
 # Description: Updates packages, themes, files, and cleanup:
 #  1. Conditional project type updates
 #  2. Core version requirement for theme
-#  3. Update recipes location and removal from prior location
-#  4. Remove cypress and supporting files if conditions met
-#  5. Removes lando and audit files
-#  6. Global dependency updates
-#  7. Update database
-#  8. Install upgrade_status
+#  3. Update build hook in .platform.app.yaml
+#  4. Update recipes location and removal from prior location
+#  5. Remove cypress and supporting files if conditions met
+#  6. Removes lando and audit files
+#  7. Global dependency updates
+#  8. Update database
+#  9. Install upgrade_status
 
 
 # --- Update based on Project Type selected ---
@@ -59,14 +60,76 @@ run_updates() {
 run_updates
 
 ## Update the core version requirement if we can
+TMP_INFO_FILE="${INFO_FILE}.tmp"
+
 if [[ -f "$INFO_FILE" ]]; then
-    sed -i '' "/^core_version_requirement:/{
+  # Write changes to temp file
+  if sed "/^core_version_requirement:/{
         s/.*/core_version_requirement: '>=10'/
-    }" "$INFO_FILE"
-    echo "Core version requirement update was attempted"
+      }" "$INFO_FILE" > "$TMP_INFO_FILE"; then
+
+    # Replace original file with temp file
+    mv "$TMP_INFO_FILE" "$INFO_FILE"
+    echo "✅ Core version requirement updated"
+
+  else
+    # Cleanup temp file on failure
+    rm -f "$TMP_INFO_FILE"
+    echo "❌ Failed to update core version requirement"
+  fi
 else
   echo "❌ Please update the core_version_requirement value in the .info file manually. Correct value: '>=10'."
 fi
+
+
+# --- Swap placement of Platform deploy commands ---
+## Set up the update options
+set -euo pipefail
+
+PLATFORM_FILE=".platform.app.yaml"
+PLATFORM_TMP="$(mktemp)"
+UPDB="drush -y updb"
+CR="drush -y cr"
+
+if [[ ! -f "$PLATFORM_FILE" ]]; then
+  echo "Error: $PLATFORM_FILE does not exist."
+  exit 1
+fi
+
+line_updb=$(grep -Fn "$UPDB" "$PLATFORM_FILE" | cut -d: -f1 || true)
+line_cr=$(grep -Fn "$CR" "$PLATFORM_FILE" | cut -d: -f1 || true)
+
+if [[ -z "$line_updb" || -z "$line_cr" ]]; then
+  echo "One or both required Platform deploy commands are missing."
+  exit 1
+fi
+
+# If already correct, exit early
+if (( line_updb < line_cr )); then
+  echo "Platform deploy commands already in correct order."
+fi
+
+echo "Rewriting $PLATFORM_FILE to swap Platform deploy command order"
+
+awk -v u="$line_updb" -v c="$line_cr" '
+{
+  lines[NR] = $0
+}
+END {
+  t = lines[u]
+  lines[u] = lines[c]
+  lines[c] = t
+
+  for (i = 1; i <= NR; i++) {
+    print lines[i]
+  }
+}
+' "$PLATFORM_FILE" > "$PLATFORM_TMP"
+
+cat "$PLATFORM_TMP" > "$PLATFORM_FILE"
+rm "$PLATFORM_TMP"
+
+echo "Platform deploy command rewritten successfully."
 
 
 # --- Recipes ---
