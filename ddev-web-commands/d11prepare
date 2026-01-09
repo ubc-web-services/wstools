@@ -60,11 +60,23 @@ run_updates() {
 run_updates
 
 ## Update the core version requirement if we can
+TMP_INFO_FILE="${INFO_FILE}.tmp"
+
 if [[ -f "$INFO_FILE" ]]; then
-    sed -i '' "/^core_version_requirement:/{
+  # Write changes to temp file
+  if sed "/^core_version_requirement:/{
         s/.*/core_version_requirement: '>=10'/
-    }" "$INFO_FILE"
-    echo "Core version requirement update was attempted"
+      }" "$INFO_FILE" > "$TMP_INFO_FILE"; then
+
+    # Replace original file with temp file
+    mv "$TMP_INFO_FILE" "$INFO_FILE"
+    echo "✅ Core version requirement updated"
+
+  else
+    # Cleanup temp file on failure
+    rm -f "$TMP_INFO_FILE"
+    echo "❌ Failed to update core version requirement"
+  fi
 else
   echo "❌ Please update the core_version_requirement value in the .info file manually. Correct value: '>=10'."
 fi
