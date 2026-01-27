@@ -243,6 +243,7 @@ else
         rm -f package.json
         rm -f package-lock.json
         rm -f cypress.json
+        rm -f cypress.config.json
 
         if [[ -d "cypress" ]]; then
             rm -rf cypress
@@ -278,25 +279,25 @@ rm -f LICENSE
 
 
 # --- Update / Add dependencies, run bookmark button recipe ---
-composer require 'drush/drush' 'drupal/formtips:^1.11||^2.0' 'drupal/upgrade_status' 'drupal/webform:^6.3@beta' 'drupal/ckeditor5_plugin_pack' 'drupal/linkit:^7.0' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev' 'drupal/ckeditor5_fullscreen' && cd ${DDEV_DOCROOT} && php core/scripts/drupal recipe ../recipes/ws-recipes/ws-utility/utility-add-bookmark-button -v && cd ../
+composer require 'drush/drush' 'drupal/formtips:^1.11||^2.0' 'drupal/upgrade_status' 'drupal/webform:^6.3@beta' 'drupal/ckeditor5_plugin_pack' 'drupal/editor_advanced_link' 'drupal/linkit:^7.0' 'drupal/linkit_media_library:^2.0' 'drupal/image_widget_crop:^3.0' 'drupal/file_delete:^3.0' 'drupal/gin:^4.1||^5.0' 'drupal/gin_toolbar:^2.1||^3.0' 'ubc-web-services/ws-recipes:dev-ddev' 'drupal/ckeditor5_fullscreen' && cd ${DDEV_DOCROOT} && php core/scripts/drupal recipe ../recipes/ws-recipes/ws-utility/utility-add-bookmark-button -v && cd ../
 
 
 ## Check for drupal/editor_advanced_link and pin to version 2.3.1
-ADVLINK="drupal/editor_advanced_link"
-TARGET_VERSION="2.3.1"
+# ADVLINK="drupal/editor_advanced_link"
+# TARGET_VERSION="2.3.1"
 
-echo "Checking for $ADVLINK..."
+# echo "Checking for $ADVLINK..."
 
-## Look to see if the module is declared in packages
-if composer show --locked | grep -q "^$ADVLINK "; then
-    echo "✅ $ADVLINK is installed. Updating to version $TARGET_VERSION..."
-    composer require "$ADVLINK:$TARGET_VERSION"
-else
-    echo "ℹ️  $ADVLINK is not installed. Skipping."
-fi
+# ## Look to see if the module is declared in packages
+# if composer show --locked | grep -q "^$ADVLINK "; then
+#     echo "✅ $ADVLINK is installed. Updating to version $TARGET_VERSION..."
+#     composer require "$ADVLINK:$TARGET_VERSION"
+# else
+#     echo "ℹ️  $ADVLINK is not installed. Skipping."
+# fi
 
-## Run any database updates
-drush updb -y
+# ## Run any database updates
+# drush updb -y
 
 ## Enable Upgrade Status module
 drush pm:enable upgrade_status
