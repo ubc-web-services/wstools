@@ -17,7 +17,7 @@
 
 ### Prepare DDEV
 
-1.  Add ddev to the project `dd config --php-version 8.3 --database mariadb:10.11 --type drupal11` (additional services, like solr, redis can be added separately using the `add-on` command https://docs.ddev.com/en/stable/users/usage/commands/#add-on)
+1.  Add ddev to the project `dd config --php-version 8.3 --database mariadb:10.11 --project-type drupal11` (additional services, like solr, redis can be added separately using the [add-on command](https://docs.ddev.com/en/stable/users/usage/commands/#add-on))
 2.  Run `composer install` to pull in current dependencies
 3.  Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
 4.  Start the site with `ddev start`
