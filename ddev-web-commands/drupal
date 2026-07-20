@@ -1,4 +1,5 @@
 #!/bin/bash
+#ddev-silent-no-warn
 
 ## Description: run the Drupal core script with provided arguments
 ## Usage: drupal <arguments>

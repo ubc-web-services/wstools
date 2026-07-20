@@ -1,4 +1,5 @@
 #!/bin/bash
+#ddev-silent-no-warn
 
 ## Description: run npm in default theme with provided arguments
 ## Usage: theme <arguments>
