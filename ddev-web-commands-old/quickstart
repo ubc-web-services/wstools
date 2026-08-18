@@ -5,9 +5,6 @@
 ## Usage: quickstart
 ## Example: ddev quickstart
 
-# install the site
-vendor/bin/drush site:install --site-mail=no-reply.webservices@ubc.ca --account-mail=no-reply.webservices@ubc.ca --yes
-
 # setup sitename
 echo -e "Please enter the site name: "
 read sitename
@@ -19,16 +16,10 @@ read themename
 cd ${DDEV_DOCROOT}
 
 # Create a new theme
-php ../vendor/bin/dr generate-theme "$themename"  --starterkit kraken --path themes/custom
+php core/scripts/drupal generate-theme "$themename"  --starterkit kraken --path themes/custom
 
 # Run the main orchestration recipe
-php ../vendor/bin/dr recipe ../recipes/ws-recipes -v
-
-# Run the ckeditor bookmark recipe
-php ../vendor/bin/dr recipe ../recipes/ws-recipes/ws-utility/utility-add-bookmark-button -v
-
-# Run the ckeditor findreplace recipe
-php ../vendor/bin/dr recipe ../recipes/ws-recipes/ws-utility/utility-add-findreplace-button -v
+php core/scripts/drupal recipe ../recipes/ws-recipes -v
 
 # Enable devel
 drush pm:enable devel
@@ -50,17 +41,17 @@ drush config:delete "user.role.content_editor"
 drush config:delete "system.action.user_add_role_action.content_editor"
 drush config:delete "system.action.user_remove_role_action.content_editor"
 
-# Delete unused Article, Basic Page and Comment entities - removed as 11.4 no longer installs these by default
-# drush entity:delete node --bundle=article
-# drush entity:delete node --bundle=page
+# Delete unused Article, Basic Page and Comment entities
+drush entity:delete node --bundle=article
+drush entity:delete node --bundle=page
 
-# Delete Article, Basic Page and Comment types - removed as 11.4 no longer installs these by default
-# drush eval "\Drupal::entityTypeManager()->getStorage('node_type')->load('page')->delete();"
-# drush eval "\Drupal::entityTypeManager()->getStorage('node_type')->load('article')->delete();"
-# drush eval "\Drupal::entityTypeManager()->getStorage('comment_type')->load('comment')->delete();"
+# Delete Article, Basic Page and Comment types
+drush eval "\Drupal::entityTypeManager()->getStorage('node_type')->load('page')->delete();"
+drush eval "\Drupal::entityTypeManager()->getStorage('node_type')->load('article')->delete();"
+drush eval "\Drupal::entityTypeManager()->getStorage('comment_type')->load('comment')->delete();"
 
 # Disable comment and announcement modules
-# drush pmu comment - removed as 11.4 no longer installs these by default
+drush pmu comment
 drush pmu announcements_feed
 
 # Rebuild Permissions
@@ -69,11 +60,8 @@ drush php-eval 'node_access_rebuild();'
 # Run any updates
 drush updb -y
 
-# Enable the update module
-drush pm:install update -y
-
 # Set the custom theme as the default theme
-drush theme:enable "$themename" -y
+drush theme:enable "$themename"
 drush config-set system.theme default "$themename" -y
 drush config-set "$themename".settings clf_unitname "$sitename" -y
 # drush theme:uninstall kraken -y
@@ -81,7 +69,4 @@ drush config-set "$themename".settings clf_unitname "$sitename" -y
 # Export the config
 drush cex -y
 
-# Provide a link to the user 1 password reset
-drush uli
-
-echo "All done - you can now reset the admin password above ^"
+echo "All done"

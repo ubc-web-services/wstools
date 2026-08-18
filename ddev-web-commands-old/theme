@@ -7,6 +7,6 @@
 
 # find the current default theme
 THEME=$(drush config:get system.theme default --format=string)
-# Run npm in the default theme directory
+# Run npm in the OUC theme directory
 cd /var/www/html/web/themes/custom/"$THEME"
 npm "$@"

@@ -21,7 +21,7 @@
 2.  Run `composer install` to pull in current dependencies
 3.  Add the scripts in the `ddev-web-commands` directory to `.ddev/commands/web/`
 4.  Start the site with `ddev start`
-5.  Import the db with `ddev import-db < [databasename]`
+5.  Import the db with `ddev import-db --file [databasename]`
 6.  Flush caches `ddev drush cr`
 7.  Run script with `ddev d11prepare`
 
