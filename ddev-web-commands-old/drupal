@@ -7,4 +7,4 @@
 
 cd ${DDEV_DOCROOT}
 
-php ../vendor/bin/dr "$@"
+php core/scripts/drupal "$@"
